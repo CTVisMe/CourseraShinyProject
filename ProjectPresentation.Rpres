@@ -1,0 +1,66 @@
+DDP : Project 
+========================================================
+author: Chris Volinsky
+date: December 20, 2015
+transition: zoom
+
+Data
+========================================================
+
+My Project involves data that I collected on myself as part of the [My Year of Data](myyearofdata.wordpress.com) project.  Basically this was a one year experiment to collect data about myself, back in 2012. 
+
+- Daily Weight data collected from a Withings Scale
+- Four years of data! 
+- Some days have duplicate or multiple data points
+
+Shiny implementation
+========================================================
+
+I used Shiny to create a time series plot of the data.
+
+Widgets include:
+- Start Time
+- End Time
+- Slider for span parameter of "loess" function
+
+I used ggplot2 to create the time series plot, and the *stat.smooth()* option to implement the smoother
+
+Data Facts
+========================
+
+The data exists in the Github repository in the file LatestWeight.csv.  Here is the code I used to read it in:
+
+```{r, echo=TRUE,eval=TRUE}
+
+library(lubridate)
+
+datafile="LatestWeight.csv"  
+weight=read.csv(datafile,header=T)
+names(weight)=c("ts","weight","fat","lean","comments")
+weight$ts = parse_date_time(weight$ts,"%Y-%m-%d %H:%M %p")
+```
+
+The earliest date in the file is `r floor_date(min(weight$ts),unit="day")`.  
+The latest date in the file is `r floor_date(max(weight$ts),unit="day")`.  
+The average weight in the file is `r round(mean(weight$weight),1)`.  
+
+
+Weight Plot
+========================================================
+
+Here is a plot of all of the data:
+
+
+```{r, echo=FALSE,fig.width=15}
+
+
+library(ggplot2)
+  p=ggplot(weight,aes(ts,weight),main="Plot") +
+        geom_point(alpha=0.8) +
+        stat_smooth(method="loess",size=2,se=FALSE,span=0.3) +
+        ylab("Weight (in pounds)") + 
+        xlab("Date")
+      p
+```
+
+During the year I was tracking my data (2012), my weight fell.  Since then, however it has been a steady climb! 
